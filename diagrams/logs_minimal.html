@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DGLA Logs Visualization</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+    .card { background: white; border-radius: 5px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .section { margin-bottom: 30px; }
+    .log-entry { border-left: 4px solid #3498db; padding: 10px; margin: 10px 0; background: #f8f9fa; }
+    .attack { border-left-color: #e74c3c; }
+    .repair { border-left-color: #2ecc71; }
+    .deploy { border-left-color: #f39c12; }
+    .timestamp { color: #7f8c8d; font-size: 0.8em; }
+    .success { color: #2ecc71; }
+    .error { color: #e74c3c; }
+    .warning { color: #f39c12; }
+    .tab-container { display: flex; margin-bottom: 20px; }
+    .tab { padding: 10px 20px; cursor: pointer; background: #ddd; margin-right: 5px; border-radius: 5px 5px 0 0; }
+    .tab.active { background: #3498db; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Rogers 5G DGLA Blockchain Logs</h1>
+    
+    <div class="tab-container">
+      <div class="tab active" onclick="showTab('attack-logs')">Attack Detection</div>
+      <div class="tab" onclick="showTab('repair-logs')">Self-Healing</div>
+      <div class="tab" onclick="showTab('deploy-logs')">Deployment</div>
+    </div>
+    
+    <div class="tab-content active" id="attack-logs">
+      <div class="card">
+        <h2>Blockchain Security Events</h2>
+        
+        <div class="log-entry attack">
+          <div class="timestamp">2025-06-10 14:23:15</div>
+          <strong class="error">ALERT:</strong> Block #142 hash mismatch detected - Expected: 8a2f1b9, Got: 8a2f1c1<br>
+          <div>Verification method: verify_chain_integrity</div>
+          <div>Affected network slice: Emergency Services (priority: 100)</div>
+        </div>
+        
+        <div class="log-entry attack">
+          <div class="timestamp">2025-06-10 14:23:18</div>
+          <strong class="error">ALERT:</strong> Tamper attempt detected on block #142<br>
+          <div>Authorized NB_KEY_5G_ES_PRIO verification failed</div>
+          <div>Potential priority manipulation attempt</div>
+        </div>
+        
+        <div class="log-entry attack">
+          <div class="timestamp">2025-06-12 09:42:03</div>
+          <strong class="error">ALERT:</strong> Key validation failure - Validator node V2<br>
+          <div>Non-deterministic key used: NB_KEY_RANDOM_GEN_5829</div>
+          <div>Expected deterministic key format: NB_KEY_5G_*</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="repair-logs">
+      <div class="card">
+        <h2>Blockchain Self-Healing Actions</h2>
+        
+        <div class="log-entry repair">
+          <div class="timestamp">2025-06-10 14:23:20</div>
+          <strong class="success">REPAIR:</strong> Auto-repair initiated for Block #142<br>
+          <div>Recalculating block hash...</div>
+          <div>Restoring Emergency Services priority: 100</div>
+        </div>
+        
+        <div class="log-entry repair">
+          <div class="timestamp">2025-06-10 14:23:25</div>
+          <strong class="success">REPAIR:</strong> Block #142 successfully repaired<br>
+          <div>New hash: 8a2f1b9 (verified)</div>
+          <div>Re-mining completed with difficulty: 4</div>
+          <div>Chain integrity verified: PASS</div>
+        </div>
+        
+        <div class="log-entry repair">
+          <div class="timestamp">2025-06-12 09:42:15</div>
+          <strong class="success">REPAIR:</strong> Key reset performed<br>
+          <div>Validator node V2 keys reset to deterministic format</div>
+          <div>New key assigned: NB_KEY_5G_VAL_V2</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="deploy-logs">
+      <div class="card">
+        <h2>Deployment Activity</h2>
+        
+        <div class="log-entry deploy">
+          <div class="timestamp">2025-06-09 10:15:00</div>
+          <strong>DEPLOY:</strong> New code version submitted<br>
+          <div>Deployment ID: DGLA-5G-20250609</div>
+          <div>Author: Developer Team</div>
+          <div>Changes: Fixed verification methods in nanobond.html</div>
+        </div>
+        
+        <div class="log-entry deploy">
+          <div class="timestamp">2025-06-09 10:18:35</div>
+          <strong class="success">CONSENSUS:</strong> 3/3 validators approved<br>
+          <div>V1: APPROVED</div>
+          <div>V2: APPROVED</div>
+          <div>V3: APPROVED</div>
+          <div>Deployment recorded in blockchain</div>
+        </div>
+        
+        <div class="log-entry deploy">
+          <div class="timestamp">2025-06-09 10:20:12</div>
+          <strong class="success">DEPLOY:</strong> Successfully deployed to production<br>
+          <div>All nodes synchronized</div>
+          <div>Verification state initialized</div>
+          <div>Ledger integrity verified</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(tabId).classList.add('active');
+      
+      // Add active class to clicked tab
+      document.querySelectorAll('.tab').forEach(tab => {
+        if (tab.textContent.toLowerCase().includes(tabId.split('-')[0])) {
+          tab.classList.add('active');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

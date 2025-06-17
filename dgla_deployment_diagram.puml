@@ -1,0 +1,121 @@
+@startuml DGLA Deployment Sequence
+
+' Style settings
+skinparam sequenceArrowThickness 2
+skinparam sequenceGroupBorderThickness 2
+skinparam noteBorderThickness 1
+skinparam sequenceLifeLineBorderColor blue
+skinparam sequenceGroupBorderColor green
+skinparam sequenceGroupBackgroundColor lightgreen
+
+actor "Developer" as Dev
+participant "CI/CD Pipeline" as CI
+participant "Deployment Manager" as Deploy
+participant "Signing Authority" as Sign
+participant "Validator Node 1" as V1
+participant "Validator Node 2" as V2
+participant "Validator Node 3" as V3
+participant "DGLA Blockchain" as BC
+participant "Network Nodes" as Nodes
+
+note over Dev, Nodes: Rogers 5G Deployment Protocol
+
+== Code Submission Phase ==
+
+Dev -> CI: Submit code changes
+activate CI
+CI -> CI: Static analysis
+CI -> CI: Unit tests
+CI -> CI: Build package
+CI -> CI: Security scans
+
+alt Build fails
+    CI --> Dev: Return build errors
+    note right: Developer must fix issues\nbefore proceeding
+else Build succeeds
+    CI -> Deploy: Submit deployment package
+    activate Deploy
+end
+deactivate CI
+
+== Verification Phase ==
+
+Deploy -> Sign: Request code signing
+activate Sign
+Sign -> Sign: Review changes
+Sign -> Sign: Verify deterministic keys
+note right: Using NB_KEY_5G_* format as per fix
+Sign -> Sign: Verify verification methods
+note right: Confirm verify_chain_integrity() is used
+Sign -> Deploy: Return signed deployment
+deactivate Sign
+
+Deploy -> V1: Submit signed deployment proposal
+Deploy -> V2: Submit signed deployment proposal
+Deploy -> V3: Submit signed deployment proposal
+
+activate V1
+V1 -> V1: Verify signatures
+V1 -> V1: Verify code hash
+V1 -> V1: Check policy compliance
+V1 --> Deploy: Submit vote (approve/reject)
+deactivate V1
+
+activate V2
+V2 -> V2: Verify signatures
+V2 -> V2: Verify code hash
+V2 -> V2: Check policy compliance
+V2 --> Deploy: Submit vote (approve/reject)
+deactivate V2
+
+activate V3
+V3 -> V3: Verify signatures
+V3 -> V3: Verify code hash
+V3 -> V3: Check policy compliance
+V3 --> Deploy: Submit vote (approve/reject)
+deactivate V3
+
+== Consensus Phase ==
+
+Deploy -> Deploy: Collect votes
+Deploy -> Deploy: Check for 2/3 majority
+
+alt Consensus Failed
+    Deploy --> Dev: Return rejection notice
+    note right: Must address validator concerns
+else Consensus Achieved
+    Deploy -> BC: Record deployment in blockchain
+    activate BC
+    BC -> BC: Create deployment block
+    BC -> BC: Mine block
+    BC -> BC: Verify chain integrity
+    note right: Using fixed verification method
+    BC --> Deploy: Confirm blockchain record
+    deactivate BC
+end
+
+== Deployment Phase ==
+
+alt Verification Failed
+    Deploy --> Dev: Return verification failure
+    note right: Must fix verification issues
+else Verification Succeeded
+    Deploy -> Nodes: Deploy to production nodes
+    activate Nodes
+    
+    loop For each node
+        Nodes -> Nodes: Update code
+        Nodes -> Nodes: Set initial verification state
+        note right: Fix issue in Rogers demo
+        Nodes -> Nodes: Verify ledger integrity
+        Nodes -> Nodes: Sync blockchain state
+    end
+    
+    Nodes --> Deploy: Confirm successful deployment
+    deactivate Nodes
+    
+    Deploy --> Dev: Deployment success notification
+    deactivate Deploy
+end
+
+@enduml

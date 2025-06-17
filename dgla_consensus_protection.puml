@@ -1,0 +1,143 @@
+@startuml DGLA Consensus & Infrastructure Protection
+
+' Style settings
+!define PROCESS_BG LightSkyBlue
+!define SECURITY_BG PaleGreen
+!define ATTACK_BG Salmon
+!define PHYSICAL_BG LightGoldenRodYellow
+!define REMOTE_BG Pink
+
+skinparam componentStyle rectangle
+skinparam backgroundColor White
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+' Title
+title Rogers 5G Infrastructure Protection - DGLA Consensus Mechanism
+
+' Define the top-level partitions
+rectangle "Physical Infrastructure" as PHY #PHYSICAL_BG {
+    rectangle "Rogers 5G Cell Towers" as TOWER
+    rectangle "Edge Data Centers" as EDGE
+    rectangle "IoT Devices" as IOT
+    rectangle "Emergency Services Vehicles" as ESV
+}
+
+rectangle "Digital Infrastructure" as DIG {
+    rectangle "Network Slice Management" as SLICE #PROCESS_BG {
+        rectangle "Emergency Services Slice" as ES_SLICE
+        rectangle "Consumer Services Slice" as CS_SLICE
+        rectangle "IoT Services Slice" as IOT_SLICE
+    }
+    
+    rectangle "DGLA Blockchain Network" as BCN #PROCESS_BG {
+        rectangle "Primary Validation Node" as VN1
+        rectangle "Secondary Validation Node" as VN2
+        rectangle "Tertiary Validation Node" as VN3
+        rectangle "Observer Nodes" as OBS
+    }
+    
+    rectangle "Consensus Protocol" as CON #PROCESS_BG {
+        rectangle "Proposal Phase" as PROP
+        rectangle "Verification Phase" as VERIF
+        rectangle "Voting Phase" as VOTE
+        rectangle "Commitment Phase" as COMMIT
+    }
+}
+
+rectangle "Security Controls" as SEC #SECURITY_BG {
+    rectangle "Deterministic Key Store" as KEYS
+    rectangle "Block Hash Verification" as HASH
+    rectangle "Merkle Tree Validation" as MERKLE
+    rectangle "Self-Healing Repairs" as REPAIR
+    rectangle "Immutable Audit Log" as AUDIT
+}
+
+rectangle "External Attack Vectors" as ATK #ATTACK_BG {
+    rectangle "Slice Priority Manipulation" as PRIORITY
+    rectangle "Block Tampering" as TAMPERING
+    rectangle "Identity Spoofing" as SPOOFING
+    rectangle "Unauthorized Deployment" as UNAUTH
+}
+
+rectangle "Remote Operations Center" as ROC #REMOTE_BG {
+    rectangle "Network Operations Center" as NOC
+    rectangle "Security Operations Center" as SOC
+    rectangle "DevOps Team" as DEVOPS
+}
+
+' Define the relationships and flows
+
+' Physical to Digital connections
+PHY -[dashed]-> DIG : "Secure Infrastructure Connection"
+TOWER --> SLICE : "Network Slice Requests"
+IOT --> IOT_SLICE : "Device Registration"
+ESV --> ES_SLICE : "Emergency Priority Access"
+
+' Slice management relationships
+SLICE --> BCN : "Cryptographic Records" 
+ES_SLICE -[bold]-> BCN : "Priority Configuration (100)"
+CS_SLICE --> BCN : "Priority Configuration (50)"
+IOT_SLICE --> BCN : "Device Registry"
+
+' Blockchain consensus
+BCN --> CON : "Agreement Process"
+VN1 -[bold]-> PROP : "Initiate Proposal"
+PROP --> VERIF : "Submit for Verification"
+VERIF -[bold]-> HASH : "verify_chain_integrity()"
+VERIF --> KEYS : "Check Key Signatures"
+VOTE --> COMMIT : "2/3+ Majority Required"
+COMMIT -[bold]-> BCN : "Finalize Block"
+
+' Security controls
+HASH --> BCN : "Block Validation"
+KEYS --> BCN : "NB_KEY_5G_* Format Keys"
+MERKLE --> BCN : "Data Integrity"
+REPAIR --> BCN : "Auto-repair if Tampering"
+AUDIT --> BCN : "Record All Actions"
+
+' External attack vectors
+PRIORITY -[#red,dashed,thickness=2]-> ES_SLICE : "Attempt to Lower Priority"
+TAMPERING -[#red,dashed,thickness=2]-> BCN : "Modify Block Data"
+SPOOFING -[#red,dashed,thickness=2]-> VN2 : "Impersonate Validator"
+UNAUTH -[#red,dashed,thickness=2]-> COMMIT : "Bypass Approval"
+
+' Security controls blocking attacks
+HASH -[#green,dashed,thickness=2]-> TAMPERING : "Detect & Block"
+KEYS -[#green,dashed,thickness=2]-> SPOOFING : "Prevent via PKI"
+MERKLE -[#green,dashed,thickness=2]-> UNAUTH : "Verify Integrity"
+REPAIR -[#green,dashed,thickness=2]-> PRIORITY : "Restore Correct Priority"
+
+' Remote operations
+ROC --> BCN : "Monitor & Manage"
+NOC --> SLICE : "Configure Slices"
+SOC -[bold]-> SEC : "Security Response"
+DEVOPS -[bold]-> COMMIT : "Signed Deployments"
+
+note right of HASH
+  Fixed verify_chain_integrity() instead of non-existent verify_chain()
+  Ensures cryptographic verification of all blocks
+end note
+
+note right of KEYS
+  Deterministic shared keys in NB_KEY_5G_* format
+  Ensures consistent verification across all nodes
+end note
+
+note right of REPAIR
+  Self-healing blockchain repairs tampered blocks
+  Fixed in our implementation to ensure data integrity
+end note
+
+note right of AUDIT
+  Initial verification state properly set
+  Added proper error handling with detailed logging
+end note
+
+note bottom of ES_SLICE
+  Emergency Services slice priority (100) is 
+  cryptographically verified to prevent manipulation
+  Critical for 911 calls and first responder services
+end note
+
+@enduml

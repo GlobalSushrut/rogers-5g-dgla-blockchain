@@ -1,0 +1,143 @@
+@startuml DGLA Protocol Architecture
+
+' Style settings
+skinparam componentStyle uml2
+skinparam componentBackgroundColor LightSkyBlue
+skinparam componentBorderColor DarkSlateGray
+skinparam interfaceBackgroundColor PaleGreen
+skinparam databaseBackgroundColor LightYellow
+skinparam actorBackgroundColor LightPink
+
+!define RECTANGLE class
+
+' Network Layers
+package "Application Layer" {
+    [Rogers 5G Applications] as Apps
+    [Management Dashboard] as Dashboard
+    [CLI Tools] as CLI
+}
+
+package "API Layer" {
+    interface "REST API" as RestAPI
+    interface "GraphQL API" as GraphQL
+    interface "gRPC Interface" as GRPC
+}
+
+package "Business Logic Layer" {
+    component "Network Slice Manager" as SliceManager
+    component "IoT Device Registry" as DeviceRegistry
+    component "Verification Service" as VerifyService
+    component "Repair Engine" as RepairEngine
+    
+    note bottom of VerifyService
+        Fixed verification using
+        verify_chain_integrity()
+        instead of verify_chain()
+    end note
+}
+
+package "Data Governance Layer" {
+    component "DGLA Core" as DGLACore
+    component "Access Control" as AccessCtrl
+    component "Audit Service" as AuditService
+    component "Policy Engine" as PolicyEngine
+}
+
+package "Blockchain Layer" {
+    database "Blockchain Storage" as BlockchainDB
+    component "Consensus Engine" as ConsensusEngine
+    component "Merkle Tree Verifier" as MerkleVerifier
+    component "Block Mining Service" as MiningService
+    
+    note bottom of BlockchainDB
+        Uses deterministic shared keys
+        in NB_KEY_5G_* format for
+        consistent verification
+    end note
+}
+
+package "Security Layer" {
+    component "PKI Infrastructure" as PKI
+    component "Cryptographic Services" as CryptoService
+    component "Tamper Detection" as TamperDetect
+    component "Key Management" as KeyMgmt
+    
+    note bottom of KeyMgmt
+        Sets initial verification 
+        state to avoid UI issues
+    end note
+}
+
+package "Network Layer" {
+    component "P2P Networking" as P2PNetwork
+    component "Node Discovery" as NodeDiscovery
+    component "State Synchronization" as StateSync
+}
+
+' Device Actors
+:Emergency Services: as Emergency
+:Consumer Devices: as Consumer
+:IoT Devices: as IoTDev
+:Validators: as Validators
+
+' Protocol connections with specific protocols
+Apps -down-> RestAPI : HTTP/TLS
+CLI -down-> GRPC : Protocol Buffers
+Dashboard -down-> GraphQL : GraphQL/TLS
+
+RestAPI -down-> SliceManager : Internal API
+GraphQL -down-> SliceManager : Internal API
+GRPC -down-> SliceManager : Internal API
+
+SliceManager -down-> DGLACore : DGLA Protocol
+DeviceRegistry -down-> DGLACore : DGLA Protocol
+VerifyService -down-> DGLACore : DGLA Protocol
+RepairEngine -down-> DGLACore : DGLA Protocol
+
+DGLACore -down-> BlockchainDB : Blockchain Protocol
+AccessCtrl -down-> BlockchainDB : Access Protocol
+AuditService -down-> BlockchainDB : Audit Protocol
+PolicyEngine -down-> BlockchainDB : Policy Protocol
+
+BlockchainDB -down-> PKI : X.509
+ConsensusEngine -down-> PKI : X.509
+MerkleVerifier -down-> CryptoService : SHA-256
+MiningService -down-> CryptoService : Proof of Work
+
+PKI -down-> P2PNetwork : TLS 1.3
+CryptoService -down-> P2PNetwork : ChaCha20-Poly1305
+TamperDetect -down-> P2PNetwork : Alert Protocol
+KeyMgmt -down-> P2PNetwork : Key Exchange
+
+' External actor connections
+Emergency -up-> Apps : HTTPS
+Consumer -up-> Apps : HTTPS
+IoTDev -up-> DeviceRegistry : MQTT/TLS
+Validators -up-> ConsensusEngine : BFT Protocol
+
+' Cross-layer connections
+VerifyService -right-> TamperDetect : Detection
+RepairEngine -right-> TamperDetect : Alert Response
+RepairEngine --> ConsensusEngine : Repair Proposal
+VerifyService --> MerkleVerifier : Verification
+
+SliceManager --> AccessCtrl : Authorization
+KeyMgmt --> VerifyService : Keys
+
+' Key verification flow
+TamperDetect ..> RepairEngine : Alert
+RepairEngine ..> BlockchainDB : Repair
+BlockchainDB ..> StateSync : Synchronize
+StateSync ..> P2PNetwork : Broadcast
+
+' Detailed protocols with security annotations
+note "TLS 1.3\nMutual Authentication" as TLSN
+note "SHA-256 + Ed25519" as HashN
+note "Byzantine Fault Tolerance\n2/3 Majority Required" as BFTN
+
+' Connect notes to relevant links
+TLSN .. (Apps -up-> RestAPI)
+HashN .. (DGLACore -down-> BlockchainDB)
+BFTN .. (ConsensusEngine -down-> PKI)
+
+@enduml

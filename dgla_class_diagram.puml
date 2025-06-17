@@ -1,0 +1,182 @@
+@startuml DGLA Blockchain Class Diagram
+
+' Style settings
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classBackgroundColor LightBlue
+skinparam classBorderColor Navy
+skinparam packageBackgroundColor LightYellow
+skinparam packageBorderColor Orange
+
+package "DGLA Blockchain Core" {
+    abstract class Block {
+        - index: int
+        - timestamp: datetime
+        - data: dict
+        - previous_hash: str
+        - nonce: int
+        - hash: str
+        + calculate_hash(): str
+        + mine_block(difficulty: int): void
+    }
+    
+    class MerkleTree {
+        - leaves: List[str]
+        - nodes: Dict[int, List[str]]
+        + add_leaf(data: str): void
+        + get_root(): str
+        + get_proof(index: int): List[str]
+        + verify_proof(data: str, proof: List[str], root: str): bool
+    }
+    
+    class DGLABlockchain {
+        - chain: List[Block]
+        - difficulty: int
+        - shared_keys: Dict[str, str]
+        - pending_transactions: List[dict]
+        + add_block(data: dict): Block
+        + get_latest_block(): Block
+        + verify_chain_integrity(): Tuple[bool, str]
+        + create_merkle_tree(data: List[dict]): MerkleTree
+        + generate_deterministic_key(purpose: str): str
+    }
+    
+    class SelfHealingBlockchain {
+        - repair_history: List[dict]
+        + detect_tampering(): List[int]
+        + repair_chain(): Tuple[bool, str, List[int]]
+        + get_repair_history(): List[dict]
+    }
+    
+    class DGLADataStore {
+        - blockchain: DGLABlockchain
+        - verification_state: bool
+        + store_network_slice(slice_data: dict): str
+        + store_iot_device(device_data: dict): str
+        + verify_integrity(): Tuple[bool, str]
+        + get_slice_by_id(slice_id: str): dict
+        + get_all_slices(): List[dict]
+    }
+    
+    class EnhancedDataStore {
+        - repair_history: List[dict]
+        + auto_repair_if_needed(): Tuple[bool, str, List[int]]
+        + reset_shared_keys(): void
+        + get_repair_history(): List[dict]
+    }
+}
+
+package "DGLA Security" {
+    class CryptographicVerifier {
+        + verify_signature(data: dict, signature: str, pub_key: str): bool
+        + sign_data(data: dict, priv_key: str): str
+        + hash_data(data: dict): str
+    }
+    
+    class PKIManager {
+        - key_pairs: Dict[str, Dict[str, str]]
+        - certificates: Dict[str, Dict]
+        + generate_key_pair(entity_id: str): Dict[str, str]
+        + issue_certificate(entity_id: str, public_key: str): Dict
+        + verify_certificate(cert: Dict): bool
+        + revoke_certificate(cert_id: str): void
+    }
+    
+    class TamperDetector {
+        - alert_handlers: List[Callable]
+        + check_block_integrity(block: Block): bool
+        + verify_merkle_proof(data: str, proof: List[str], root: str): bool
+        + register_alert_handler(handler: Callable): void
+        + trigger_alert(alert_data: dict): void
+    }
+}
+
+package "Deployment & Consensus" {
+    class DeploymentManager {
+        - active_deployments: List[dict]
+        - deployment_history: List[dict]
+        + deploy_version(version: str, package: bytes): str
+        + verify_deployment(deployment_id: str): bool
+        + rollback_deployment(deployment_id: str): bool
+        + get_active_version(): str
+    }
+    
+    class ConsensusManager {
+        - validators: List[str]
+        - pending_proposals: Dict[str, Dict]
+        - voting_results: Dict[str, Dict]
+        + submit_proposal(proposal: Dict): str
+        + cast_vote(proposal_id: str, validator: str, vote: bool): void
+        + check_consensus(proposal_id: str): Tuple[bool, float]
+        + execute_proposal_if_approved(proposal_id: str): bool
+    }
+
+    class ValidatorNode {
+        - node_id: str
+        - pub_key: str
+        - priv_key: str
+        - peers: List[str]
+        + verify_proposal(proposal: Dict): bool
+        + sign_vote(proposal_id: str, vote: bool): str
+        + broadcast_vote(vote: Dict): void
+        + sync_state(): void
+    }
+}
+
+package "Network Slice Management" {
+    class NetworkSliceManager {
+        - active_slices: Dict[str, Dict]
+        - slice_templates: Dict[str, Dict]
+        + create_slice(type_name: str, priority: int): Dict
+        + modify_slice(slice_id: str, properties: Dict): bool
+        + delete_slice(slice_id: str): bool
+        + get_slice_status(slice_id: str): str
+        + verify_slice_integrity(slice_id: str): bool
+    }
+    
+    class SliceDeployment {
+        - slice_id: str
+        - deployment_id: str
+        - status: str
+        - nodes: List[str]
+        + deploy(): bool
+        + verify(): bool
+        + update(properties: Dict): bool
+        + rollback(): bool
+    }
+}
+
+package "Rogers 5G Components" {
+    class RogersSliceVerifier {
+        + verify_emergency_slice(slice_id: str): bool
+        + verify_consumer_slice(slice_id: str): bool
+        + detect_priority_manipulation(slice_id: str): Tuple[bool, str]
+        + remediate_slice(slice_id: str): bool
+    }
+    
+    class Rogers5GDeploy {
+        + deploy_network_config(config: Dict): bool
+        + deploy_slice_template(template: Dict): str
+        + verify_deployment(deployment_id: str): bool
+        + generate_deployment_report(): Dict
+    }
+}
+
+' Relationships
+Block <-- DGLABlockchain : contains
+DGLABlockchain <|-- SelfHealingBlockchain : extends
+DGLABlockchain <-- DGLADataStore : uses
+DGLADataStore <|-- EnhancedDataStore : extends
+MerkleTree <-- DGLABlockchain : uses
+CryptographicVerifier <-- DGLABlockchain : uses
+TamperDetector <-- SelfHealingBlockchain : uses
+PKIManager <-- ValidatorNode : uses
+ConsensusManager <-- ValidatorNode : participates in
+
+DGLADataStore <-- NetworkSliceManager : stores data via
+NetworkSliceManager <-- SliceDeployment : creates
+NetworkSliceManager <-- RogersSliceVerifier : verifies
+DeploymentManager <-- Rogers5GDeploy : uses
+ConsensusManager <-- DeploymentManager : requires approval from
+
+@enduml
